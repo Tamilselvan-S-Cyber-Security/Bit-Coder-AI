@@ -2,6 +2,7 @@ import streamlit as st
 import time
 from utils.audio_handler import AudioHandler
 from utils.gemini_helper import GeminiHelper
+from utils.code_executor import CodeExecutor #New import
 from assets.programming_info import PROGRAMMING_LANGUAGES, DEVELOPER_BIO
 
 # Page configuration
@@ -20,6 +21,10 @@ if 'audio_handler' not in st.session_state:
     st.session_state.audio_handler = AudioHandler()
 if 'gemini_helper' not in st.session_state:
     st.session_state.gemini_helper = GeminiHelper()
+if 'current_code' not in st.session_state: #New session state
+    st.session_state.current_code = ""
+if 'execution_result' not in st.session_state: #New session state
+    st.session_state.execution_result = None
 
 # Main header
 st.markdown('<h1 class="main-header">AI Coding Assistant</h1>', unsafe_allow_html=True)
@@ -36,10 +41,10 @@ col1, col2 = st.columns([2, 1])
 
 with col1:
     st.markdown("### Ask Your Coding Question")
-    
+
     # Text input for questions
     user_question = st.text_area("Type your question here:", height=100)
-    
+
     # Voice input button
     if st.button("🎤 Use Voice Input", key="voice_button", help="Click to speak your question"):
         with st.spinner("Listening..."):
@@ -63,20 +68,44 @@ with col1:
                     selected_language
                 )
                 if response:
-                    st.markdown("### Response:")
+                    st.markdown("### Generated Code:")
                     st.code(response, language=selected_language.lower())
-        else:
-            st.warning("Please enter a question first!")
+                    st.session_state.current_code = response #Update session state
+
+    # Code execution section  (NEW SECTION)
+    if st.session_state.current_code:
+        st.markdown("### Code Execution")
+        edited_code = st.text_area(
+            "Edit code before execution:",
+            value=st.session_state.current_code,
+            height=200
+        )
+
+        if st.button("▶️ Run Code", key="execute_button"):
+            with st.spinner("Executing code..."):
+                success, result = CodeExecutor.execute_code(edited_code, selected_language)
+                st.session_state.execution_result = {
+                    'success': success,
+                    'output': result
+                }
+
+        if st.session_state.execution_result:
+            st.markdown("### Execution Result:")
+            if st.session_state.execution_result['success']:
+                st.code(st.session_state.execution_result['output'])
+            else:
+                st.error(st.session_state.execution_result['output'])
+
 
 with col2:
     st.markdown("### Quick Tips")
     st.info("""
     - Be specific in your questions
     - Include relevant context
-    - Mention target programming language
-    - Ask for examples when needed
+    - Use code execution to test solutions
+    - Edit code before running if needed
     """)
-    
+
     # Loading animation for visual feedback
     with st.empty():
         if st.session_state.get('is_generating', False):
