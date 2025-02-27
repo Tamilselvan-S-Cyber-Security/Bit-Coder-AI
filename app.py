@@ -87,7 +87,7 @@ with col1:
             height=200
         )
 
-        # Execute/Preview button
+        # Execute/Preview button with appropriate label
         button_label = "🔍 Preview" if selected_language in ['HTML', 'CSS'] else "▶️ Run Code"
         if st.button(button_label, key="execute_button"):
             with st.spinner("Processing code..."):

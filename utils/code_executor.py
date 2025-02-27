@@ -8,13 +8,15 @@ class CodeExecutor:
     SUPPORTED_LANGUAGES = {
         'Python': {
             'extension': '.py',
-            'command': 'python3',  # Changed from 'python' to 'python3'
-            'timeout': 10
+            'command': 'python3',
+            'timeout': 10,
+            'env_setup': lambda: {'PYTHONPATH': os.getcwd()}
         },
         'JavaScript': {
             'extension': '.js',
             'command': 'node',
-            'timeout': 10
+            'timeout': 10,
+            'env_setup': lambda: {}
         },
         'HTML': {
             'extension': '.html',
@@ -29,12 +31,14 @@ class CodeExecutor:
         'Ruby': {
             'extension': '.rb',
             'command': 'ruby',
-            'timeout': 10
+            'timeout': 10,
+            'env_setup': lambda: {}
         },
         'PHP': {
             'extension': '.php',
             'command': 'php',
-            'timeout': 10
+            'timeout': 10,
+            'env_setup': lambda: {}
         }
     }
 
@@ -67,10 +71,10 @@ class CodeExecutor:
                 command = [lang_config['command'], temp_file_path]
                 timeout = lang_config['timeout']
 
-                # Add current working directory to PYTHONPATH for Python imports
+                # Set up environment variables
                 env = os.environ.copy()
-                if language == 'Python':
-                    env['PYTHONPATH'] = os.getcwd()
+                if 'env_setup' in lang_config:
+                    env.update(lang_config['env_setup']())
 
                 result = subprocess.run(
                     command,
@@ -84,7 +88,8 @@ class CodeExecutor:
                 os.unlink(temp_file_path)
 
                 if result.returncode == 0:
-                    return True, result.stdout.strip() or "Code executed successfully (no output)"
+                    output = result.stdout.strip()
+                    return True, output if output else "Code executed successfully (no output)"
                 else:
                     error_msg = result.stderr.strip()
                     return False, f"Error: {error_msg}"
