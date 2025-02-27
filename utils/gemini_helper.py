@@ -29,69 +29,67 @@ class GeminiHelper:
             return "The AI model is not properly initialized. Please try again later."
 
         try:
-            # Enhanced prompt formatting
-            context = f"""As an expert {programming_language} developer, please help with this question:
+            # Prompt focused on code-only response
+            context = f"""As an expert {programming_language} developer, provide ONLY working code example for this question:
 
             Question: {prompt}
 
-            Format your response with:
-            1. Brief explanation
-            2. Code example with comments
-            3. Key points to remember
-
-            Please use Markdown code blocks for code examples."""
+            Rules:
+            - Provide ONLY the code solution
+            - Include brief comments in the code to explain key parts
+            - Wrap the code in appropriate markdown code blocks
+            - No explanations or text outside the code block
+            """
 
             # Generate response
             response = self.model.generate_content(context)
 
             if not response:
-                return "Sorry, I couldn't generate a response. Please try rephrasing your question."
+                return "Sorry, I couldn't generate code. Please try rephrasing your question."
 
             # Extract text from response
             if hasattr(response, 'text'):
-                return self.format_code_response(response.text)
+                return self.extract_code_blocks(response.text)
             elif hasattr(response, 'parts'):
-                return self.format_code_response(response.parts[0].text)
+                return self.extract_code_blocks(response.parts[0].text)
             else:
-                return "Received an invalid response format. Please try again."
+                return "No code could be generated. Please try again."
 
         except Exception as e:
             error_msg = str(e)
             st.error(f"Error generating response: {error_msg}")
             return "An error occurred while processing your request. Please try again."
 
-    def format_code_response(self, response):
+    def extract_code_blocks(self, response):
         if not response:
-            return "No response received"
+            return "No code received"
 
         try:
-            # Format code blocks and preserve markdown
+            # Extract only code blocks from the response
             lines = response.split('\n')
-            formatted_lines = []
+            code_blocks = []
             in_code_block = False
-            code_block_lines = []
+            current_block = []
 
             for line in lines:
                 if line.strip().startswith('```'):
                     if in_code_block:
-                        code_block_lines.append(line)
-                        formatted_lines.append('\n'.join(code_block_lines))
-                        code_block_lines = []
+                        current_block.append(line)
+                        code_blocks.append('\n'.join(current_block))
+                        current_block = []
                         in_code_block = False
                     else:
                         in_code_block = True
-                        code_block_lines = [line]
-                else:
-                    if in_code_block:
-                        code_block_lines.append(line)
-                    else:
-                        formatted_lines.append(line)
+                        current_block = [line]
+                elif in_code_block:
+                    current_block.append(line)
 
-            if code_block_lines:  # Handle any remaining code block
-                formatted_lines.append('\n'.join(code_block_lines))
+            if current_block:  # Handle any remaining code block
+                code_blocks.append('\n'.join(current_block))
 
-            return '\n'.join(formatted_lines)
+            # Return only the code blocks
+            return '\n\n'.join(code_blocks) if code_blocks else "No code blocks found in the response"
 
         except Exception as e:
-            st.warning(f"Error formatting response: {str(e)}")
+            st.warning(f"Error extracting code: {str(e)}")
             return response
