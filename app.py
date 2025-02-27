@@ -38,7 +38,7 @@ if 'execute_code' not in st.session_state:
 
 
 # Main header
-st.markdown('<h1 class="main-header">Bit-Coder-AI 🤖</h1>', unsafe_allow_html=True)
+st.markdown('<h1 class="main-header">🧠Bit-Coder-AI 🤖</h1>', unsafe_allow_html=True)
 
 # Sidebar with programming languages
 st.sidebar.title("Programming Languages")
