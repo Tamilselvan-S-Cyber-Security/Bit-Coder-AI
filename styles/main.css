@@ -1,0 +1,48 @@
+/* Custom styling for the app */
+.stApp {
+    font-family: 'Inter', sans-serif;
+}
+
+.main-header {
+    text-align: center;
+    padding: 2rem 0;
+    background: linear-gradient(120deg, #FF4B4B, #7928CA);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.language-section {
+    padding: 1rem;
+    border-radius: 10px;
+    background-color: rgba(38, 39, 48, 0.1);
+    margin: 1rem 0;
+}
+
+.code-block {
+    border-radius: 8px;
+    padding: 1rem;
+    background-color: #1E1E1E;
+    font-family: 'Source Code Pro', monospace;
+}
+
+.bio-section {
+    padding: 2rem;
+    border-radius: 10px;
+    background-color: rgba(255, 75, 75, 0.1);
+    margin-top: 2rem;
+}
+
+.voice-button {
+    background-color: #FF4B4B;
+    color: white;
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.voice-button:hover {
+    background-color: #ff6b6b;
+    transform: scale(1.05);
+}
