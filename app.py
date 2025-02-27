@@ -13,7 +13,7 @@ from assets.programming_info import PROGRAMMING_LANGUAGES, DEVELOPER_BIO
 
 # Page configuration
 st.set_page_config(
-    page_title="AI Coding Assistant - Bit-Coder Developers",
+    page_title="Bit-Coder-AI  ",
     page_icon="🤖",
     layout="wide"
 )
@@ -38,7 +38,7 @@ if 'execute_code' not in st.session_state:
 
 
 # Main header
-st.markdown('<h1 class="main-header">AI Coding Assistant</h1>', unsafe_allow_html=True)
+st.markdown('<h1 class="main-header">Bit-Coder-AI 🤖</h1>', unsafe_allow_html=True)
 
 # Sidebar with programming languages
 st.sidebar.title("Programming Languages")
