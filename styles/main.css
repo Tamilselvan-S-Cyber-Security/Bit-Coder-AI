@@ -1,6 +1,6 @@
-/* Custom styling for the app */
+/* Modern UI styling */
 .stApp {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .main-header {
@@ -9,40 +9,77 @@
     background: linear-gradient(120deg, #FF4B4B, #7928CA);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    font-size: 2.5rem !important;
+    font-weight: 800 !important;
+    margin-bottom: 2rem;
 }
 
 .language-section {
-    padding: 1rem;
-    border-radius: 10px;
+    padding: 1.5rem;
+    border-radius: 12px;
     background-color: rgba(38, 39, 48, 0.1);
     margin: 1rem 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+}
+
+.language-section:hover {
+    transform: translateY(-2px);
 }
 
 .code-block {
-    border-radius: 8px;
-    padding: 1rem;
+    border-radius: 10px;
+    padding: 1.5rem;
     background-color: #1E1E1E;
-    font-family: 'Source Code Pro', monospace;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    margin: 1rem 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
 .bio-section {
     padding: 2rem;
-    border-radius: 10px;
-    background-color: rgba(255, 75, 75, 0.1);
+    border-radius: 15px;
+    background: linear-gradient(145deg, rgba(255, 75, 75, 0.1), rgba(121, 40, 202, 0.1));
     margin-top: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .voice-button {
-    background-color: #FF4B4B;
+    background: linear-gradient(120deg, #FF4B4B, #7928CA);
     color: white;
-    border-radius: 20px;
-    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    padding: 0.75rem 1.5rem;
     border: none;
     cursor: pointer;
     transition: all 0.3s ease;
+    font-weight: 600;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .voice-button:hover {
-    background-color: #ff6b6b;
-    transform: scale(1.05);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Custom styling for Streamlit elements */
+.stTextInput, .stTextArea {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border-radius: 10px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.stButton > button {
+    border-radius: 25px !important;
+    padding: 0.75rem 1.5rem !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+}
+
+.stSelectbox {
+    border-radius: 10px !important;
+}
+
+/* Loading animation */
+.stSpinner {
+    border-color: #FF4B4B !important;
 }
