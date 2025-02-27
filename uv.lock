@@ -871,7 +871,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "google-generativeai", specifier = ">=0.8.4" },
+    { name = "google-generativeai", specifier = ">=0.3.0" },
     { name = "speechrecognition", specifier = ">=3.14.1" },
     { name = "streamlit", specifier = ">=1.42.2" },
 ]
