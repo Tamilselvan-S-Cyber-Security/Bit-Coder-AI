@@ -2,7 +2,7 @@ import streamlit as st
 import time
 from utils.audio_handler import AudioHandler
 from utils.gemini_helper import GeminiHelper
-from utils.code_executor import CodeExecutor #New import
+from utils.code_executor import CodeExecutor
 from assets.programming_info import PROGRAMMING_LANGUAGES, DEVELOPER_BIO
 
 # Page configuration
@@ -21,9 +21,9 @@ if 'audio_handler' not in st.session_state:
     st.session_state.audio_handler = AudioHandler()
 if 'gemini_helper' not in st.session_state:
     st.session_state.gemini_helper = GeminiHelper()
-if 'current_code' not in st.session_state: #New session state
+if 'current_code' not in st.session_state:
     st.session_state.current_code = ""
-if 'execution_result' not in st.session_state: #New session state
+if 'execution_result' not in st.session_state:
     st.session_state.execution_result = None
 
 # Main header
@@ -70,9 +70,9 @@ with col1:
                 if response:
                     st.markdown("### Generated Code:")
                     st.code(response, language=selected_language.lower())
-                    st.session_state.current_code = response #Update session state
+                    st.session_state.current_code = response
 
-    # Code execution section  (NEW SECTION)
+    # Code execution section
     if st.session_state.current_code:
         st.markdown("### Code Execution")
         edited_code = st.text_area(
@@ -81,21 +81,30 @@ with col1:
             height=200
         )
 
-        if st.button("▶️ Run Code", key="execute_button"):
-            with st.spinner("Executing code..."):
+        # Execute/Preview button
+        button_label = "🔍 Preview" if selected_language in ['HTML', 'CSS'] else "▶️ Run Code"
+        if st.button(button_label, key="execute_button"):
+            with st.spinner("Processing code..."):
                 success, result = CodeExecutor.execute_code(edited_code, selected_language)
                 st.session_state.execution_result = {
                     'success': success,
                     'output': result
                 }
 
+        # Display results
         if st.session_state.execution_result:
-            st.markdown("### Execution Result:")
-            if st.session_state.execution_result['success']:
-                st.code(st.session_state.execution_result['output'])
+            st.markdown("### Result:")
+            if selected_language in ['HTML', 'CSS']:
+                st.markdown("#### Preview:")
+                st.markdown(CodeExecutor.render_markup(
+                    st.session_state.execution_result['output'],
+                    selected_language
+                ), unsafe_allow_html=True)
             else:
-                st.error(st.session_state.execution_result['output'])
-
+                if st.session_state.execution_result['success']:
+                    st.code(st.session_state.execution_result['output'])
+                else:
+                    st.error(st.session_state.execution_result['output'])
 
 with col2:
     st.markdown("### Quick Tips")
@@ -104,6 +113,7 @@ with col2:
     - Include relevant context
     - Use code execution to test solutions
     - Edit code before running if needed
+    - For HTML/CSS, use preview to see results
     """)
 
     # Loading animation for visual feedback
