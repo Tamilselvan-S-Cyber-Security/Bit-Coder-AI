@@ -31,6 +31,11 @@ if 'current_code' not in st.session_state:
     st.session_state.current_code = ""
 if 'execution_result' not in st.session_state:
     st.session_state.execution_result = None
+if 'selected_language' not in st.session_state:
+    st.session_state.selected_language = None
+if 'execute_code' not in st.session_state:
+    st.session_state.execute_code = False
+
 
 # Main header
 st.markdown('<h1 class="main-header">AI Coding Assistant</h1>', unsafe_allow_html=True)
@@ -42,6 +47,10 @@ for category, languages in PROGRAMMING_LANGUAGES.items():
     for lang, desc in languages.items():
         st.sidebar.markdown(f"- **{lang}**: {desc}")
 
+# Voice commands help section in sidebar
+st.sidebar.markdown("### Voice Commands")
+st.sidebar.info(st.session_state.audio_handler.get_command_help())
+
 # Main content area
 col1, col2 = st.columns([2, 1])
 
@@ -51,22 +60,38 @@ with col1:
     # Text input for questions
     user_question = st.text_area("Type your question here:", height=100)
 
-    # Voice input button
-    if st.button("🎤 Use Voice Input", key="voice_button", help="Click to speak your question"):
-        with st.spinner("Listening..."):
-            voice_text = st.session_state.audio_handler.listen_to_audio()
-            if voice_text:
-                user_question = voice_text
-                st.text_area("Your voice input:", value=voice_text, height=100)
+    # Voice input section with enhanced feedback
+    voice_col1, voice_col2 = st.columns([1, 2])
+    with voice_col1:
+        if st.button("🎤 Use Voice Input", key="voice_button", help="Click to speak your command"):
+            with st.spinner("Listening..."):
+                command_result = st.session_state.audio_handler.listen_to_audio()
+                if command_result:
+                    # Update language if specified in voice command
+                    if command_result['language']:
+                        st.session_state.selected_language = command_result['language']
+
+                    # Update question field with the voice input
+                    user_question = command_result['query']
+
+                    # Handle specific command types
+                    if command_result['command_type'] == 'execute' and st.session_state.current_code:
+                        st.session_state.execute_code = True
+
+    with voice_col2:
+        st.info("🎙️ Click the button and speak your command")
 
     # Language selection
     selected_language = st.selectbox(
         "Select Programming Language",
-        options=[lang for category in PROGRAMMING_LANGUAGES.values() for lang in category.keys()]
+        options=[lang for category in PROGRAMMING_LANGUAGES.values() for lang in category.keys()],
+        index=list(PROGRAMMING_LANGUAGES['Backend Languages'].keys()).index('Python') if 'Backend Languages' in PROGRAMMING_LANGUAGES and 'Python' in PROGRAMMING_LANGUAGES['Backend Languages'] else 0,
+        key='language_selector'
     )
+    st.session_state.selected_language = selected_language
 
     # Generate response
-    if st.button("Get Answer", key="generate_button"):
+    if st.button("Get Answer", key="generate_button") or user_question:
         if user_question:
             with st.spinner("Generating response..."):
                 response = st.session_state.gemini_helper.get_code_response(
@@ -89,13 +114,14 @@ with col1:
 
         # Execute/Preview button with appropriate label
         button_label = "🔍 Preview" if selected_language in ['HTML', 'CSS'] else "▶️ Run Code"
-        if st.button(button_label, key="execute_button"):
+        if st.button(button_label, key="execute_button") or st.session_state.get('execute_code', False):
             with st.spinner("Processing code..."):
                 success, result = CodeExecutor.execute_code(edited_code, selected_language)
                 st.session_state.execution_result = {
                     'success': success,
                     'output': result
                 }
+                st.session_state.execute_code = False
 
         # Display results
         if st.session_state.execution_result:
@@ -115,6 +141,7 @@ with col1:
 with col2:
     st.markdown("### Quick Tips")
     st.info("""
+    - Use voice commands for quick actions
     - Be specific in your questions
     - Include relevant context
     - Use code execution to test solutions
