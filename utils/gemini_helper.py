@@ -12,82 +12,83 @@ class GeminiHelper:
         try:
             genai.configure(api_key=api_key)
 
-            # List available models to verify configuration
-            model_list = genai.list_models()
-            self.model = None
+            # Initialize with gemini-1.5-flash model
+            self.model = genai.GenerativeModel('gemini-1.5-flash')
 
-            # Find and select the correct model
-            for model in model_list:
-                if 'gemini-pro' in model.name:
-                    self.model = genai.GenerativeModel(model.name)
-                    break
-
-            if not self.model:
-                raise ValueError("Gemini Pro model not found in available models")
+            # Test the model initialization
+            response = self.model.generate_content("Test connection")
+            if not response:
+                raise ValueError("Failed to initialize Gemini model")
 
         except Exception as e:
             st.error(f"Failed to initialize Gemini model: {str(e)}")
-            raise
+            self.model = None
 
     def get_code_response(self, prompt, programming_language=None):
+        if not self.model:
+            return "The AI model is not properly initialized. Please try again later."
+
         try:
             # Enhanced prompt formatting
-            context = f"""You are an expert {programming_language} developer. 
-            Please help with the following question:
+            context = f"""As an expert {programming_language} developer, please help with this question:
 
             Question: {prompt}
 
-            Please format your response as follows:
+            Format your response with:
             1. Brief explanation
             2. Code example with comments
             3. Key points to remember
 
-            Use markdown code blocks for any code."""
+            Please use Markdown code blocks for code examples."""
 
-            # Generate response with proper error handling
+            # Generate response
             response = self.model.generate_content(context)
 
+            if not response:
+                return "Sorry, I couldn't generate a response. Please try rephrasing your question."
+
+            # Extract text from response
             if hasattr(response, 'text'):
                 return self.format_code_response(response.text)
             elif hasattr(response, 'parts'):
                 return self.format_code_response(response.parts[0].text)
             else:
-                return "I apologize, but I couldn't generate a response. Please try rephrasing your question."
+                return "Received an invalid response format. Please try again."
 
         except Exception as e:
             error_msg = str(e)
             st.error(f"Error generating response: {error_msg}")
-            return f"I encountered an error while processing your request: {error_msg}. Please try again."
+            return "An error occurred while processing your request. Please try again."
 
     def format_code_response(self, response):
         if not response:
-            return ""
+            return "No response received"
 
         try:
-            # Split response into sections
+            # Format code blocks and preserve markdown
+            lines = response.split('\n')
             formatted_lines = []
-            current_block = []
             in_code_block = False
+            code_block_lines = []
 
-            for line in response.split('\n'):
+            for line in lines:
                 if line.strip().startswith('```'):
                     if in_code_block:
-                        current_block.append(line)
-                        formatted_lines.append('\n'.join(current_block))
-                        current_block = []
+                        code_block_lines.append(line)
+                        formatted_lines.append('\n'.join(code_block_lines))
+                        code_block_lines = []
                         in_code_block = False
                     else:
                         in_code_block = True
-                        current_block = [line]
+                        code_block_lines = [line]
                 else:
                     if in_code_block:
-                        current_block.append(line)
+                        code_block_lines.append(line)
                     else:
                         formatted_lines.append(line)
 
-            # Handle any remaining code block
-            if current_block:
-                formatted_lines.append('\n'.join(current_block))
+            if code_block_lines:  # Handle any remaining code block
+                formatted_lines.append('\n'.join(code_block_lines))
 
             return '\n'.join(formatted_lines)
 
