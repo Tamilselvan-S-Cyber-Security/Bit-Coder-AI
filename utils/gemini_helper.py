@@ -1,12 +1,18 @@
 import google.generativeai as genai
 import streamlit as st
 import os
+from dotenv import load_dotenv
 
 class GeminiHelper:
     def __init__(self):
+        # Load environment variables
+        load_dotenv()
+
+        # Get API key with better error handling
         api_key = os.getenv("GEMINI_API_KEY")
-        if not api_key:
-            raise ValueError("GEMINI_API_KEY environment variable is not set")
+        if not api_key or api_key == "YOUR_API_KEY_HERE":
+            st.error("Please set your GEMINI_API_KEY in the .env file")
+            raise ValueError("GEMINI_API_KEY environment variable is not properly set")
 
         # Configure the Google Generative AI
         try:

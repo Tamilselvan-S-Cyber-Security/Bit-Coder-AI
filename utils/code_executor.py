@@ -8,7 +8,7 @@ class CodeExecutor:
     SUPPORTED_LANGUAGES = {
         'Python': {
             'extension': '.py',
-            'command': 'python',
+            'command': 'python3',  # Changed from 'python' to 'python3'
             'timeout': 10
         },
         'JavaScript': {
@@ -63,15 +63,21 @@ class CodeExecutor:
                 temp_file_path = temp_file.name
 
             try:
-                # Execute the code
+                # Execute the code with proper error handling
                 command = [lang_config['command'], temp_file_path]
                 timeout = lang_config['timeout']
+
+                # Add current working directory to PYTHONPATH for Python imports
+                env = os.environ.copy()
+                if language == 'Python':
+                    env['PYTHONPATH'] = os.getcwd()
 
                 result = subprocess.run(
                     command,
                     capture_output=True,
                     text=True,
-                    timeout=timeout
+                    timeout=timeout,
+                    env=env
                 )
 
                 # Clean up
@@ -89,9 +95,13 @@ class CodeExecutor:
             except FileNotFoundError:
                 os.unlink(temp_file_path)
                 return False, f"Runtime for {language} is not installed. Please install {language} to execute this code."
+            except Exception as e:
+                if os.path.exists(temp_file_path):
+                    os.unlink(temp_file_path)
+                return False, f"Execution error: {str(e)}"
 
         except Exception as e:
-            return False, f"Execution error: {str(e)}"
+            return False, f"Setup error: {str(e)}"
 
     @staticmethod
     def render_markup(code: str, language: str) -> str:

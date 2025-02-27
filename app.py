@@ -1,5 +1,11 @@
 import streamlit as st
 import time
+from dotenv import load_dotenv
+import os
+
+# Load environment variables
+load_dotenv()
+
 from utils.audio_handler import AudioHandler
 from utils.gemini_helper import GeminiHelper
 from utils.code_executor import CodeExecutor
